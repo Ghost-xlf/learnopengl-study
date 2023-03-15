@@ -45,29 +45,47 @@ int main()
     return -1;
   }
 
+  glEnable(GL_PROGRAM_POINT_SIZE); // 启用后在绘制时设置点大小
   // 定义顶点数组
   float vertices[] = {
-      -0.5f, -0.5f, 0.0f,
-      0.5f, -0.5f, 0.0f,
-      0.0f, 0.5f, 0.0f};
+      0.5f, 0.5f, 0.0f,   // 右上角
+      0.5f, -0.5f, 0.0f,  // 右下角
+      -0.5f, -0.5f, 0.0f, // 左下角
+      -0.5f, 0.5f, 0.0f   // 左上角
+  };
+
+  unsigned int indices[] = {
+      // 注意索引从0开始!
+      // 此例的索引(0,1,2,3)就是顶点数组vertices的下标，
+      // 这样可以由下标代表顶点组合成矩形
+
+      0, 1, 3, // 第一个三角形
+      1, 2, 3  // 第二个三角形
+  };
   // 生成vbo顶点缓冲对象
-  unsigned int VBO, VAO;
-  std::cout << VBO;
+  unsigned int VBO, VAO, EBO;
+  // std::cout << VBO;
   glGenBuffers(1, &VBO); //& 代指引用目标地址 不构建新的内存  ！权限不能放大。   const 只读 int 可读写
   glGenVertexArrays(1, &VAO);
+  glGenBuffers(1, &EBO);
   // 绑定vao
-  glBindVertexArray(VBO);
+  glBindVertexArray(VAO);
 
   // 绑定缓冲对象
   glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
   // 填充数据
   glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+  // 填充EBO数据
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
   //
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
-  glEnableVertexAttribArray(0);
+  glEnableVertexAttribArray(0); // 启用顶点指针索引
 
-  glBindVertexArray(0);
+  glBindVertexArray(0); // 解绑vb
   // 创建顶点着色器 片元着色器
   unsigned int vertexShader, fragmentShader;
   vertexShader = glCreateShader(GL_VERTEX_SHADER);
@@ -121,6 +139,8 @@ int main()
   // 删除
   glDeleteShader(vertexShader);
   glDeleteShader(fragmentShader);
+  // 绘制模式限定
+  glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // 线框绘制
 
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
   glEnableVertexAttribArray(0);
@@ -130,12 +150,21 @@ int main()
     processInput(window);
     clearColorBuffer();
     glUseProgram(shaderProgram);
-    glBindVertexArray(VAO);
-    glDrawArrays(GL_TRIANGLES, 0, 3);
-    glBindVertexArray(0);
+    glBindVertexArray(VAO); // 在绑定VAO时，绑定的最后一个元素缓冲区对象存储为VAO的元素缓冲区对象。然后，绑定到VAO也会自动绑定该EBO。
+    // glDrawArrays(GL_TRIANGLES, 0, 3); // GL_TRIANGLES 三角 GL_LINE_LOOP 线 GL_POINT 点
+    // glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO); // opengl核心模式要求我们使用vao 如果我们vao绑定失败 opengl会拒绝绘制任何东西
+    glDrawElements(GL_LINE_LOOP, 6, GL_UNSIGNED_INT, 0);
+    glBindVertexArray(0); // 解绑vao
     glfwSwapBuffers(window);
     glfwPollEvents();
   }
+
+  // 资源释放
+  glDeleteVertexArrays(1, &VAO);
+  glDeleteBuffers(1, &VBO);
+  glDeleteBuffers(1, &EBO);
+  glDeleteProgram(shaderProgram);
 
   glfwTerminate();
   return 0;
