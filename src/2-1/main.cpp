@@ -1,6 +1,5 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include <math.h>
 
 #include <iostream>
 
@@ -26,10 +25,9 @@ const char *fragmentShaderSource1 = "#version 330 core\n"
 
 const char *fragmentShaderSource2 = "#version 330 core\n"
                                     "out vec4 FragColor;\n"
-                                    "uniform vec4 ourColor;"
                                     "void main()\n"
                                     "{\n"
-                                    "   FragColor = ourColor;\n"
+                                    "   FragColor = vec4(1.0f, 0.0f, 0.0f, 1.0f);\n"
                                     "}\n\0";
 int main()
 {
@@ -195,13 +193,6 @@ int main()
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
   glEnableVertexAttribArray(0);
 
-  // 设置时间绑定
-  float timeValue = glfwGetTime();
-  float greenValue = (sin(timeValue) / 2.0f) + 0.5f;
-  int vertexColorLocation = glGetUniformLocation(shaderProgram2, "ourColor");
-  glUseProgram(shaderProgram2);
-  glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
-
   while (!glfwWindowShouldClose(window))
   {
     processInput(window);
@@ -213,23 +204,13 @@ int main()
     glUseProgram(shaderProgram2);
     glBindVertexArray(VAOS[1]);       // 在绑定VAO时，绑定的最后一个元素缓冲区对象存储为VAO的元素缓冲区对象。然后，绑定到VAO也会自动绑定该EBO。
     glDrawArrays(GL_TRIANGLES, 0, 3); // GL_TRIANGLES 三角 GL_LINE_LOOP 线 GL_POINT 点
-                                      // glBindBuffer(GL_ARRAY_BUFFER, VBO);
-                                      // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO); // opengl核心模式要求我们使用vao 如果我们vao绑定失败 opengl会拒绝绘制任何东西
-                                      // glDrawElements(GL_LINE_LOOP, 6, GL_UNSIGNED_INT, 0);
-
-    float timeValue = glfwGetTime();
-    float greenValue = (sin(timeValue) / 2.0f) + 0.5f;
-    int vertexColorLocation = glGetUniformLocation(shaderProgram2, "ourColor");
-    glUseProgram(shaderProgram2);
-    glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
-
+    // glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO); // opengl核心模式要求我们使用vao 如果我们vao绑定失败 opengl会拒绝绘制任何东西
+    // glDrawElements(GL_LINE_LOOP, 6, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0); // 解绑vao
     glfwSwapBuffers(window);
     glfwPollEvents();
   }
-  int nrAttributes;
-  glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &nrAttributes);
-  std::cout << "Maximum nr of vertex attributes supported: " << nrAttributes << std::endl;
 
   // 资源释放
   glDeleteVertexArrays(2, VAOS);
