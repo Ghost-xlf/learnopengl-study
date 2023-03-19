@@ -13,6 +13,7 @@ int clearColorBuffer();
 
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
+float wsValue = 0.0f;
 
 int main()
 {
@@ -110,10 +111,13 @@ int main()
   stbi_image_free(data);
 
   // 设置过滤方式
-  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+  float borderColor[] = {0.1f, 1.0f, 1.0f, 1.0f};
+  glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
   // texture2
   glGenTextures(1, &texture2);
   glBindTexture(GL_TEXTURE_2D, texture2);
@@ -126,8 +130,10 @@ int main()
   };
   stbi_image_free(data);
 
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); // set texture wrapping to GL_REPEAT (default wrapping method)
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+  // 设置环绕和过滤方式
+
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT); // set texture wrapping to GL_REPEAT (default wrapping method)
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
   // set texture filtering parameters
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -149,10 +155,11 @@ int main()
     glBindTexture(GL_TEXTURE_2D, texture2);
     ourShade.setInt("texture1", 0);
     ourShade.setInt("texture2", 1);
-
+    // processInput(window);
     // glActiveTexture(GL_TEXTURE0);
     // glBindTexture(GL_TEXTURE_2D, texture1);
     ourShade.setFloat("xOffSize", xOffSize);
+    ourShade.setFloat("wsValue", wsValue);
     // glDrawArrays(GL_TRIANGLES, 0, 3); // GL_TRIANGLES 三角 GL_LINE_LOOP 线 GL_POINT 点
     // glBindBuffer(GL_ARRAY_BUFFER, VBO);
     // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO); // opengl核心模式要求我们使用vao 如果我们vao绑定失败 opengl会拒绝绘制任何东西
@@ -176,6 +183,19 @@ void processInput(GLFWwindow *window)
   // std::cout << "" << std::endl;
   if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) // 如果有按键输入 esc 关闭窗口
     glfwSetWindowShouldClose(window, true);
+
+  if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+  {
+    wsValue += 0.001f; // change this value accordingly (might be too slow or too fast based on system hardware)
+    if (wsValue >= 1.0f)
+      wsValue = 1.0f;
+  }
+  if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+  {
+    wsValue -= 0.001f; // change this value accordingly (might be too slow or too fast based on system hardware)
+    if (wsValue <= 0.0f)
+      wsValue = 0.0f;
+  }
 }
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height) // 窗口改变回调
