@@ -12,7 +12,7 @@
                 "command": "powershell",
                 "args": [
                     "-c",
-                    "make"
+                    "make dir=3" // 调试
                 ]
             },
             "linux": {

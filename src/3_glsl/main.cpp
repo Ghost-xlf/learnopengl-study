@@ -12,15 +12,19 @@ const unsigned int SCR_HEIGHT = 600;
 
 const char *vertexShaderSource = "#version 330 core\n"
                                  "layout (location = 0) in vec3 aPos;\n"
+                                 "layout (location = 1) in vec3 aColor; // 颜色变量的属性位置值为 1\n"
+                                 "out vec3 outColor;\n"
                                  "void main()\n"
                                  "{\n"
                                  "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0f);\n"
+                                 "   outColor = aColor;\n"
                                  "}\0";
 const char *fragmentShaderSource = "#version 330 core\n"
                                    "out vec4 FragColor;\n"
+                                   "in vec3 outColor;\n"
                                    "void main()\n"
                                    "{\n"
-                                   "   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
+                                   "   FragColor = vec4(outColor, 1.0f);\n"
                                    "}\n\0";
 int main()
 {
@@ -48,10 +52,9 @@ int main()
   glEnable(GL_PROGRAM_POINT_SIZE); // 启用后在绘制时设置点大小
   // 定义顶点数组
   float vertices[] = {
-      0.5f, 0.5f, 0.0f,   // 右上角
-      0.5f, -0.5f, 0.0f,  // 右下角
-      -0.5f, -0.5f, 0.0f, // 左下角
-      -0.5f, 0.5f, 0.0f   // 左上角
+      0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f,   // 右上角
+      0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f,  // 右下角
+      -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, // 左下角
   };
 
   unsigned int indices[] = {
@@ -59,8 +62,8 @@ int main()
       // 此例的索引(0,1,2,3)就是顶点数组vertices的下标，
       // 这样可以由下标代表顶点组合成矩形
 
-      0, 1, 3, // 第一个三角形
-      1, 2, 3  // 第二个三角形
+      0, 1, 2, // 第一个三角形
+               // 1, 2, 3 // 第二个三角形
   };
   // 生成vbo顶点缓冲对象
   unsigned int VBO, VAO, EBO;
@@ -82,8 +85,11 @@ int main()
   glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
   //
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)0);
   glEnableVertexAttribArray(0); // 启用顶点指针索引
+
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)(3 * sizeof(float))); // 注意第一个参数
+  glEnableVertexAttribArray(1);
 
   glBindVertexArray(0); // 解绑vb
   // 创建顶点着色器 片元着色器
@@ -140,10 +146,7 @@ int main()
   glDeleteShader(vertexShader);
   glDeleteShader(fragmentShader);
   // 绘制模式限定
-  glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // 线框绘制
-
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
-  glEnableVertexAttribArray(0);
+  // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // 线框绘制
 
   while (!glfwWindowShouldClose(window))
   {
@@ -154,7 +157,7 @@ int main()
     // glDrawArrays(GL_TRIANGLES, 0, 3); // GL_TRIANGLES 三角 GL_LINE_LOOP 线 GL_POINT 点
     // glBindBuffer(GL_ARRAY_BUFFER, VBO);
     // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO); // opengl核心模式要求我们使用vao 如果我们vao绑定失败 opengl会拒绝绘制任何东西
-    glDrawElements(GL_LINE_LOOP, 6, GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0); // 解绑vao
     glfwSwapBuffers(window);
     glfwPollEvents();
