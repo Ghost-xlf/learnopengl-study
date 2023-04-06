@@ -187,6 +187,7 @@ int main()
     glActiveTexture(GL_TEXTURE1); // 在绑定纹理之前先激活纹理单元
     glBindTexture(GL_TEXTURE_2D, texture2);
     factor = glfwGetTime();
+    trans = glm::translate(trans, glm::vec3(-0.5f, 0.0f, 0.0f)); // 根据矩阵左乘 最后一步的矩阵操作为最先 操作 所以是先旋转 后 平移
     trans = glm::rotate(trans, float(glm::radians(factor * 5.0)), glm::vec3(0.0f, 0.0, 1.0));
     trans = glm::scale(trans, glm::vec3(0.5f, 0.5f, 0.5f));
     glUniformMatrix4fv(transfrom, 1, GL_FALSE, glm::value_ptr(trans));
@@ -199,11 +200,14 @@ int main()
     // glBindTexture(GL_TEXTURE_2D, texture1);
     ourShade.setFloat("xOffSize", xOffSize);
     ourShade.setFloat("wsValue", wsValue);
-    // ourShade.setFloat("factor", -factor);
-    // glDrawArrays(GL_TRIANGLES, 0, 3); // GL_TRIANGLES 三角 GL_LINE_LOOP 线 GL_POINT 点
-    // glBindBuffer(GL_ARRAY_BUFFER, VBO);
     // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO); // opengl核心模式要求我们使用vao 如果我们vao绑定失败 opengl会拒绝绘制任何东西
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    // trans = glm::scale(trans, glm::vec3(0.5f, 0.5f, 0.5f));
+    trans = glm::translate(trans, glm::vec3(0.5f, 0.0f, 0.0f));
+    trans = glm::scale(trans, glm::vec3(0.5f, 0.5f, 0.5f));
+    glUniformMatrix4fv(transfrom, 1, GL_FALSE, glm::value_ptr(trans));
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    trans = glm::mat4(1.0f);
     glBindVertexArray(0); // 解绑vao
     glfwSwapBuffers(window);
     glfwPollEvents();
