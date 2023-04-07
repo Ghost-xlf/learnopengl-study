@@ -6,7 +6,9 @@ layout(location = 2) in vec2 TexCoords;
 out vec3 outPosition;
 out vec2 outTexCoord;
 out float stp;
-mat4 model;
+uniform mat4 model;
+uniform mat4 view;
+uniform mat4 poj;
 
 uniform float factor;
 
@@ -48,11 +50,12 @@ void main() {
 
   // mat4 rotate = rotateZ(factor) * rotateY(factor) * rotateX(factor);
 
-  gl_Position = rotateXYZ(factor) * vec4(Position, 1.0f);
+  // gl_Position = rotateXYZ(factor) * vec4(Position, 1.0f);
 
-  // gl_Position = vec4(Position, 1.0f);
+  // // gl_Position = vec4(Position, 1.0f);
 
-  stp = length(Position.y - sin(factor * 5.0));
-  gl_PointSize = 5.0f * stp;
+  // stp = length(Position.y - sin(factor * 5.0));
+  // gl_PointSize = 5.0f * stp;
   outTexCoord = TexCoords;
+  gl_Position =  poj * view * model * vec4(Position, 1.0f);
 }
