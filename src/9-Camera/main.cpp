@@ -22,11 +22,16 @@ int clearColorBuffer();
 #include <geometry/PlaneGeometry.h>
 #include <geometry/BoxGeometry.h>
 
-const unsigned int SCR_WIDTH = 800;
-const unsigned int SCR_HEIGHT = 600;
+int SCR_WIDTH = 800;
+int SCR_HEIGHT = 600;
 float wsValue = 0.0f;
 using namespace std;
 ImVec4 clear_color = ImVec4(0.1, 0.1, 0.1, 1.0);
+
+glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
+glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+
 int main()
 {
   glfwInit();
@@ -51,7 +56,7 @@ int main()
     return -1;
   }
 
-  Shader ourShade("./src/6_practice/shader/vertex.glsl", "./src/6_practice/shader/fragment.glsl");
+  Shader ourShade("./src/9-Camera/shader/vertex.glsl", "./src/9-Camera/shader/fragment.glsl");
 
   // SphereGeometry sphereGeometry(0.5, 20.0, 20.0);
 
@@ -107,7 +112,9 @@ int main()
   // 设置平台和渲染器
   ImGui_ImplGlfw_InitForOpenGL(window, true);
   ImGui_ImplOpenGL3_Init(glsl_version);
-  float fov = 45.0f;
+  float fov = 45.0f; // 视口角度
+  glm::vec3 view_tran = glm::vec3(0.0, 0.0, -3.0);
+
   while (!glfwWindowShouldClose(window))
   {
     factor = glfwGetTime();
@@ -120,6 +127,11 @@ int main()
     ImGui::Begin("hellow");
     ImGui::Text("%.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
     ImGui::SliderFloat("float", &fov, 0.0f, 90.0f);
+    ImGui::SliderInt("SCR_WIDTH", &SCR_WIDTH, 1, 1920);
+    ImGui::SliderInt("SCR_HEIGHT", &SCR_HEIGHT, 1, 1080);
+
+    ImGui::SliderFloat3("view", (float *)&view_tran, -10.0f, 10.0f);
+
     ImGui::ColorEdit3("clear color", (float *)&clear_color);
     ImGui::End();
 
@@ -133,7 +145,15 @@ int main()
     glm::mat4 poj = glm::mat4(1.0f);
     model = glm::rotate(model, factor * glm::radians(-55.0f), glm::vec3(1.0f, 1.0f, 0.0f));
 
-    view = glm::translate(view, glm::vec3(0.0, 0.0, -3.0f));
+    // 视图矩阵
+    // view = glm::translate(view, view_tran);
+    float radius = 10.0f;
+    // float camX = sin(glfwGetTime()) * radius;
+    // float camZ = cos(glfwGetTime()) * radius;
+
+    // lookAt 1. 相机位置 2. 相机方向 3. 相机上方向
+    view = glm::lookAt(cameraPos, cameraFront, cameraUp);
+    // view = glm::translate(view, view_tran);
 
     poj = glm::perspective(glm::radians(fov), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
 
@@ -150,9 +170,12 @@ int main()
     {
       glm::mat4 model = glm::mat4(1.0f);
       model = glm::translate(model, cubePositions[i]);
-      model = glm::rotate(model, factor * glm::radians(-55.0f), glm::vec3(1.0f, 1.0f, 0.0f));
-      float angle = 20.0f;
-      model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0, 0.3, 0.5));
+      if (i % 3 == 0)
+      {
+        model = glm::rotate(model, factor * glm::radians(-55.0f), glm::vec3(1.0f, 1.0f, 0.0f));
+      }
+      // float angle = 20.0f;
+      // model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0, 0.3, 0.5));
       ourShade.setMat4("model", model);
       glDrawElements(GL_TRIANGLES, boxGeometry.indices.size(), GL_UNSIGNED_INT, 0);
     }
@@ -176,7 +199,15 @@ void processInput(GLFWwindow *window)
   // std::cout << "" << std::endl;
   if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) // 如果有按键输入 esc 关闭窗口
     glfwSetWindowShouldClose(window, true);
-
+  float cameraSpeed = 0.05f; // adjust accordingly
+  if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+    cameraPos += cameraSpeed * cameraFront;
+  if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+    cameraPos -= cameraSpeed * cameraFront;
+  if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+    cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+  if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+    cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
   if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
   {
     wsValue += 0.001f; // change this value accordingly (might be too slow or too fast based on system hardware)

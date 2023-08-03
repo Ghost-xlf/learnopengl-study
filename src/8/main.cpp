@@ -22,8 +22,8 @@ int clearColorBuffer();
 #include <geometry/PlaneGeometry.h>
 #include <geometry/BoxGeometry.h>
 
-const unsigned int SCR_WIDTH = 800;
-const unsigned int SCR_HEIGHT = 600;
+int SCR_WIDTH = 800;
+int SCR_HEIGHT = 600;
 float wsValue = 0.0f;
 using namespace std;
 ImVec4 clear_color = ImVec4(0.1, 0.1, 0.1, 1.0);
@@ -107,7 +107,8 @@ int main()
   // 设置平台和渲染器
   ImGui_ImplGlfw_InitForOpenGL(window, true);
   ImGui_ImplOpenGL3_Init(glsl_version);
-  float fov = 45.0f;
+  float fov = 45.0f; // 视口角度
+  glm::vec3 view_tran = glm::vec3(0.0, 0.0, -3.0);
   while (!glfwWindowShouldClose(window))
   {
     factor = glfwGetTime();
@@ -120,6 +121,11 @@ int main()
     ImGui::Begin("hellow");
     ImGui::Text("%.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
     ImGui::SliderFloat("float", &fov, 0.0f, 90.0f);
+    ImGui::SliderInt("SCR_WIDTH", &SCR_WIDTH, 1, 1920);
+    ImGui::SliderInt("SCR_HEIGHT", &SCR_HEIGHT, 1, 1080);
+
+    ImGui::SliderFloat3("view_x", (float *)&view_tran, -10.0f, 10.0f);
+
     ImGui::ColorEdit3("clear color", (float *)&clear_color);
     ImGui::End();
 
@@ -133,7 +139,7 @@ int main()
     glm::mat4 poj = glm::mat4(1.0f);
     model = glm::rotate(model, factor * glm::radians(-55.0f), glm::vec3(1.0f, 1.0f, 0.0f));
 
-    view = glm::translate(view, glm::vec3(0.0, 0.0, -3.0f));
+    view = glm::translate(view, view_tran);
 
     poj = glm::perspective(glm::radians(fov), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
 
@@ -150,9 +156,12 @@ int main()
     {
       glm::mat4 model = glm::mat4(1.0f);
       model = glm::translate(model, cubePositions[i]);
-      model = glm::rotate(model, factor * glm::radians(-55.0f), glm::vec3(1.0f, 1.0f, 0.0f));
-      float angle = 20.0f;
-      model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0, 0.3, 0.5));
+      if (i % 3 == 0)
+      {
+        model = glm::rotate(model, factor * glm::radians(-55.0f), glm::vec3(1.0f, 1.0f, 0.0f));
+      }
+      // float angle = 20.0f;
+      // model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0, 0.3, 0.5));
       ourShade.setMat4("model", model);
       glDrawElements(GL_TRIANGLES, boxGeometry.indices.size(), GL_UNSIGNED_INT, 0);
     }
