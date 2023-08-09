@@ -28,9 +28,12 @@ float wsValue = 0.0f;
 using namespace std;
 ImVec4 clear_color = ImVec4(0.1, 0.1, 0.1, 1.0);
 
-glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
-glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
-glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);    // 摄像机位置
+glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f); // 摄像机朝向
+glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);     // 摄像机上方向
+
+float deltaTime = 0.0f; // 当前帧与上一帧的时间差
+float lastFrame = 0.0f; // 上一帧的时间
 
 int main()
 {
@@ -118,6 +121,9 @@ int main()
   while (!glfwWindowShouldClose(window))
   {
     factor = glfwGetTime();
+    deltaTime = factor - lastFrame;
+    lastFrame = factor;
+
     processInput(window);
 
     ImGui_ImplOpenGL3_NewFrame();
@@ -126,13 +132,13 @@ int main()
 
     ImGui::Begin("hellow");
     ImGui::Text("%.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-    ImGui::SliderFloat("float", &fov, 0.0f, 90.0f);
-    ImGui::SliderInt("SCR_WIDTH", &SCR_WIDTH, 1, 1920);
-    ImGui::SliderInt("SCR_HEIGHT", &SCR_HEIGHT, 1, 1080);
+    // ImGui::SliderFloat("float", &fov, 0.0f, 90.0f);
+    // ImGui::SliderInt("SCR_WIDTH", &SCR_WIDTH, 1, 1920);
+    // ImGui::SliderInt("SCR_HEIGHT", &SCR_HEIGHT, 1, 1080);
 
-    ImGui::SliderFloat3("view", (float *)&view_tran, -10.0f, 10.0f);
+    // ImGui::SliderFloat3("view", (float *)&view_tran, -10.0f, 10.0f);
 
-    ImGui::ColorEdit3("clear color", (float *)&clear_color);
+    // ImGui::ColorEdit3("clear color", (float *)&clear_color);
     ImGui::End();
 
     clearColorBuffer();
@@ -199,7 +205,7 @@ void processInput(GLFWwindow *window)
   // std::cout << "" << std::endl;
   if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) // 如果有按键输入 esc 关闭窗口
     glfwSetWindowShouldClose(window, true);
-  float cameraSpeed = 0.05f; // adjust accordingly
+  float cameraSpeed = 2.5f * deltaTime; // adjust accordingly
   if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
     cameraPos += cameraSpeed * cameraFront;
   if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
