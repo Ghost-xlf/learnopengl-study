@@ -48,7 +48,9 @@
     "stdexcept": "cpp",
     "streambuf": "cpp",
     "cinttypes": "cpp",
-    "typeinfo": "cpp"
+    "typeinfo": "cpp",
+    "fstream": "cpp",
+    "map": "cpp"
   },
   "C_Cpp.errorSquiggles": "enabled",
   "prettier.requireConfig": false

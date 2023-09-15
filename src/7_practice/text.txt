@@ -1,0 +1,104 @@
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
+#include <tool/shader.h>
+#include <geometry/sphereGeometry.h>
+#include <geometry/SphereGeometry.h>
+
+#include <iostream>
+
+#define STB_IMAGE_IMPLEMENTATION
+#include <tool/stb_image.h>
+
+void framebuffer_size_callback(GLFWwindow *window, int width, int height);
+void processInput(GLFWwindow *window);
+int clearColorBuffer();
+// std::string Shader::dirName;
+
+const unsigned int SCREEN_WIDTH = 800;
+const unsigned int SCREEN_HEIGHT = 600;
+
+using namespace std;
+
+int main(int argc, char *argv[])
+{
+  // Shader::dirName = argv[1];
+  glfwInit();
+  // 设置主要和次要版本
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+  // 创建窗口对象
+  GLFWwindow *window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "LearnOpenGL", NULL, NULL);
+  if (window == NULL)
+  {
+    std::cout << "Failed to create GLFW window" << std::endl;
+    glfwTerminate();
+    return -1;
+  }
+  glfwMakeContextCurrent(window);
+
+  if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+  {
+    std::cout << "Failed to initialize GLAD" << std::endl;
+    return -1;
+  }
+  // 设置视口
+  glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+  glEnable(GL_PROGRAM_POINT_SIZE);
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+  // 注册窗口变化监听
+  glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+
+  Shader ourShader("./shader/vertex.glsl", "./shader/fragment.glsl");
+
+  SphereGeometry sphereGeometry(0.5, 20.0, 20.0);
+
+  float factor = 0.0;
+
+  while (!glfwWindowShouldClose(window))
+  {
+    processInput(window);
+
+    // 渲染指令
+    // ...
+    clearColorBuffer();
+
+    ourShader.use();
+
+    glBindVertexArray(sphereGeometry.VAO);
+
+    // glDrawElements(GL_TRIANGLES, sphereGeometry.indices.size(), GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_POINTS, sphereGeometry.indices.size(), GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_LINE_LOOP, sphereGeometry.indices.size(), GL_UNSIGNED_INT, 0);
+
+    glfwSwapBuffers(window);
+    glfwPollEvents();
+  }
+
+  sphereGeometry.dispose();
+  glfwTerminate();
+  return 0;
+}
+
+void framebuffer_size_callback(GLFWwindow *window, int width, int height)
+{
+  glViewport(0, 0, width, height);
+}
+
+void processInput(GLFWwindow *window)
+{
+  if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+  {
+    glfwSetWindowShouldClose(window, true);
+  }
+}
+
+int clearColorBuffer()
+{
+  glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+  glClear(GL_COLOR_BUFFER_BIT);
+  return 0;
+}
