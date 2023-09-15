@@ -37,7 +37,7 @@ int main()
     return -1;
   }
 
-  Shader ourShade("./src/4_practice/shader/vertex.glsl", "./src/4_practice/shader/fragment.glsl");
+  Shader ourShade("./src/4/shader/vertex.glsl", "./src/4/shader/fragment.glsl");
 
   glEnable(GL_PROGRAM_POINT_SIZE); // 启用后在绘制时设置点大小
   // 定义顶点数组
@@ -94,11 +94,10 @@ int main()
   // 创建纹理对象texture2
   unsigned texture1, texture2;
   stbi_set_flip_vertically_on_load(true); // 纹理采样y轴取反
-  glGenTextures(1, &texture1);
+  glGenTextures(0, &texture1);
   glBindTexture(GL_TEXTURE_2D, texture1);
 
   // 加载图片
-
   int width, height, nrChannels;
   unsigned char *data = stbi_load("./static/texture/wall.jpg", &width, &height, &nrChannels, 0);
 
@@ -107,13 +106,14 @@ int main()
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
     glGenerateMipmap(GL_TEXTURE_2D);
   };
-  stbi_image_free(data);
 
   // 设置过滤方式
-  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+  stbi_image_free(data);
   // texture2
   glGenTextures(1, &texture2);
   glBindTexture(GL_TEXTURE_2D, texture2);
@@ -123,15 +123,18 @@ int main()
   {
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
     glGenerateMipmap(GL_TEXTURE_2D);
+  }
+  else
+  {
+    std::cout << "Failed to load texture" << std::endl;
   };
-  stbi_image_free(data);
 
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); // set texture wrapping to GL_REPEAT (default wrapping method)
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
   // set texture filtering parameters
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
+  stbi_image_free(data);
   // glUniform1i(glGetUniformLocation(ourShade.ID, "texture1"), 0);
   // ourShade.setInt("texture2", 1);
 
@@ -147,8 +150,10 @@ int main()
 
     glActiveTexture(GL_TEXTURE1); // 在绑定纹理之前先激活纹理单元
     glBindTexture(GL_TEXTURE_2D, texture2);
-    ourShade.setInt("texture1", 0);
-    ourShade.setInt("texture2", 1);
+    // glUniform1i(glGetUniformLocation(ourShade.ID, "texture1"), 0);
+    // glUniform1i(glGetUniformLocation(ourShade.ID, "texture2"), 1);
+    ourShade.setInt("texture1", 1);
+    ourShade.setInt("texture2", 2);
 
     // glActiveTexture(GL_TEXTURE0);
     // glBindTexture(GL_TEXTURE_2D, texture1);

@@ -12,7 +12,7 @@
                 "command": "powershell",
                 "args": [
                     "-c",
-                    "make dir=3_shaderClass" // 调试
+                    "make dir=11-mater" // 调试
                 ]
             },
             "linux": {
