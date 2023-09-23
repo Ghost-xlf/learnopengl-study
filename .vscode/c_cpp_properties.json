@@ -11,7 +11,7 @@
                 "_UNICODE"
             ],
             "windowsSdkVersion": "10.0.16299.0",
-            "compilerPath": "D:/c/x86_64-12.2.0-release-posix-seh-rt_v10-rev1/mingw64/bin/g++.exe",
+            "compilerPath": "D:/mingw64/bin/g++.exe",
             "cStandard": "c17",
             "cppStandard": "c++17",
             "intelliSenseMode": "gcc-x64"
